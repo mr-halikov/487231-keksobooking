@@ -37,20 +37,24 @@ var generateDummy = function() {
 
     for (var i = 0; i < dummy_quantity; i++) {
 
-        var item = {'author':{}, 'offer': {}};
+        var item = {'author':{}, 'offer': {}, 'location': {}};
 
         item['author']['avatar']  = 'img/avatars/user0' + (i + 1) + '.png';
 
         item['offer']['title']    = getRandomTitle(offer_title);
-        item['offer']['address']  = '';
         item['offer']['price']    = getRandomRange(offer_price_min, offer_price_max);
         item['offer']['type']     = getRandomItem(offer_type);
         item['offer']['rooms']    = getRandomRange(offer_rooms_min, offer_rooms_max);
         item['offer']['checkin']  = getRandomItem(offer_checkin);
         item['offer']['checkout'] = getRandomItem(offer_checkout);
-        item['offer']['features'] = '';
+        item['offer']['features'] = getRanfomFeatures(offer_features);
         item['offer']['description'] = '';
-        item['offer']['photos'] = [];
+        item['offer']['photos']   = [];
+
+        item['location']['x']     = getRandomRange(300, 900);
+        item['location']['y']     = getRandomRange(150, 500);
+
+        item['offer']['address']  = item['location']['x'] + ', ' + item['location']['y'];
 
 
         function getRandomTitle(arr) {
@@ -67,6 +71,19 @@ var generateDummy = function() {
         function getRandomItem(arr) {
             var idx = Math.floor(Math.random() * Math.floor(arr.length));
             return arr[idx];
+        };
+
+        function getRanfomFeatures(arr) {
+            var quantity = getRandomRange(1, arr.length);
+            var features = Array.from(arr);
+            var remove = features.length - quantity;
+
+            for (var i = 0; i < remove; i++) {
+                var j = getRandomRange(0, features.length);
+                features.splice(j, 1);
+            }
+
+            return features;
         };
 
 
