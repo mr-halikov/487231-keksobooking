@@ -25,8 +25,12 @@ var offerTitle = [
   'Неуютное бунгало по колено в воде'
 ];
 
+
 function generateDummy() {
   var dummyQuantity = 8;
+
+  var avatarUrl = 'img/avatars/user';
+  var userAvatars = generateAvatar(avatarUrl, dummyQuantity);
 
   var offerPriceMin = 1000;
   var offerPriceMax = 1000000;
@@ -53,7 +57,7 @@ function generateDummy() {
   for (var i = 0; i < dummyQuantity; i++) {
     var item = {'author': {}, 'offer': {}, 'location': {}};
 
-    item.author.avatar = 'img/avatars/user0' + (i + 1) + '.png';
+    item.author.avatar = userAvatars[i];
     item.offer.title = getRandomTitle(offerTitle);
     item.offer.price = getRandomRange(offerPriceMin, offerPriceMax);
     item.offer.type = getRandomItem(offerType);
@@ -70,6 +74,17 @@ function generateDummy() {
 
     dummyData.push(item);
   }
+}
+
+
+function generateAvatar(url, quantity) {
+  var avatars = [];
+  for (var i = 0; i < quantity; i++) {
+    var avatar = url + '0' + (i + 1) + '.png';
+    avatars.push(avatar);
+  }
+  avatars = getRanfomPhotos(avatars);
+  return avatars;
 }
 
 
