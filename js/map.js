@@ -4,7 +4,10 @@ var dummyData = [];
 
 var cards = document.createDocumentFragment();
 var pins = document.createDocumentFragment();
-var mapBlock = document.querySelector('.map');
+
+var map = document.querySelector('.map');
+var adForm = document.querySelector('.ad-form');
+var adFormFieldsets = adForm.querySelectorAll('fieldset');
 var pinsBlock = document.querySelector('.map__pins');
 var filters = document.querySelector('.map__filters-container');
 
@@ -24,7 +27,6 @@ var offerTitle = [
   'Уютное бунгало далеко от моря',
   'Неуютное бунгало по колено в воде'
 ];
-
 
 function generateDummy() {
   var dummyQuantity = 8;
@@ -76,7 +78,6 @@ function generateDummy() {
   }
 }
 
-
 function generateAvatar(url, quantity) {
   var avatars = [];
   for (var i = 0; i < quantity; i++) {
@@ -87,7 +88,6 @@ function generateAvatar(url, quantity) {
   return avatars;
 }
 
-
 function getRandomTitle(arr) {
   var idx = Math.floor(Math.random() * Math.floor(arr.length));
   var val = arr[idx];
@@ -95,17 +95,14 @@ function getRandomTitle(arr) {
   return val;
 }
 
-
 function getRandomRange(min, max) {
   return Math.floor(Math.random() * (1 + max - min)) + min;
 }
-
 
 function getRandomItem(arr) {
   var idx = Math.floor(Math.random() * Math.floor(arr.length));
   return arr[idx];
 }
-
 
 function getRanfomFeatures(arr) {
   var quantity = getRandomRange(1, arr.length);
@@ -118,7 +115,6 @@ function getRanfomFeatures(arr) {
   }
   return features;
 }
-
 
 function getRanfomPhotos(arr) {
   var ctr = arr.length;
@@ -134,7 +130,6 @@ function getRanfomPhotos(arr) {
   }
   return arr;
 }
-
 
 function generateCard(data) {
 
@@ -160,7 +155,6 @@ function generateCard(data) {
   return cardItem;
 }
 
-
 function generateCardFeatures(features, card) {
   for (var i = 0; i < features.length; i++) {
     var feature = document.createElement('li');
@@ -168,7 +162,6 @@ function generateCardFeatures(features, card) {
     card.querySelector('.popup__features').appendChild(feature);
   }
 }
-
 
 function generateCardPhotos(photos, card) {
   for (var j = 0; j < photos.length; j++) {
@@ -183,7 +176,6 @@ function generateCardPhotos(photos, card) {
     card.querySelector('.popup__photos').appendChild(photo);
   }
 }
-
 
 function generatePin(data) {
   var pinTemplate = document.querySelector('#card_template')
@@ -203,11 +195,9 @@ function generatePin(data) {
   return pinItem;
 }
 
-
 function setPinOffset(pos, dim) {
   return parseInt(pos, 10) - dim / 2;
 }
-
 
 function renderElements() {
   cards.appendChild(generateCard(dummyData[0]));
@@ -219,9 +209,34 @@ function renderElements() {
   }
 }
 
+function resetPageState() {
+  var fadedClass = 'map--faded';
+  var disabledFromClass = 'ad-form--disabled';
 
+  var mapFaded = map.classList.contains(fadedClass);
+  var adFormDisabled = adForm.classList.contains(disabledFromClass);
+
+  if (!mapFaded) {
+    map.classList.add(fadedClass);
+  }
+
+  if (!adFormDisabled) {
+    adForm.classList.add(disabledFromClass);
+  }
+
+  for (var i = 0; i < adFormFieldsets.length; i++) {
+    var fieldset = adFormFieldsets[i];
+    var fieldsetDisabled = fieldset.hasAttribute('disabled');
+
+    if (!fieldsetDisabled) {
+      fieldset.setAttribute('disabled', 'disabled');
+    }
+  }
+}
+
+resetPageState();
 generateDummy();
 renderElements();
 
-mapBlock.insertBefore(cards, filters);
+map.insertBefore(cards, filters);
 pinsBlock.appendChild(pins);
