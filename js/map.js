@@ -191,13 +191,14 @@ function generatePin(data) {
       .querySelector('.map__pin');
 
   var pinItem = pinTemplate.cloneNode(true);
+  var pinItemImg = pinItem.querySelector('img');
   var pinWidth = 50;
   var pinHeight = 70;
 
   pinItem.style.left = setPinOffset(data.location.x, pinWidth) + 'px';
   pinItem.style.top = setPinOffset(data.location.y, pinHeight) + 'px';
-  pinItem.src = data.author.avatar;
-  pinItem.alt = data.offer.title;
+  pinItemImg.src = data.author.avatar;
+  pinItemImg.alt = data.offer.title;
 
   return pinItem;
 }
@@ -221,7 +222,6 @@ function renderElements() {
 
 generateDummy();
 renderElements();
-
 
 mapBlock.insertBefore(cards, filters);
 pinsBlock.appendChild(pins);
