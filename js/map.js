@@ -71,7 +71,7 @@ function generateDummy() {
     item.offer.checkout = getRandomItem(offerCheckout);
     item.offer.features = getRanfomFeatures(offerFeatures);
     item.offer.description = '';
-    item.offer.photos = getRanfomPhotos(offerPhotos);
+    item.offer.photos = getRandomPhotos(offerPhotos);
     item.location.x = getRandomRange(300, 900);
     item.location.y = getRandomRange(150, 500);
     item.offer.address = item.location.x + ', ' + item.location.y;
@@ -86,7 +86,7 @@ function generateAvatar(url, quantity) {
     var avatar = url + '0' + (i + 1) + '.png';
     avatars.push(avatar);
   }
-  avatars = getRanfomPhotos(avatars);
+  avatars = getRandomPhotos(avatars);
   return avatars;
 }
 
@@ -118,16 +118,16 @@ function getRanfomFeatures(arr) {
   return features;
 }
 
-function getRanfomPhotos(arr) {
-  var ctr = arr.length;
+function getRandomPhotos(arr) {
+  var length = arr.length;
   var temp;
   var index;
 
-  while (ctr > 0) {
-    index = Math.floor(Math.random() * ctr);
-    ctr--;
-    temp = arr[ctr];
-    arr[ctr] = arr[index];
+  while (length > 0) {
+    index = Math.floor(Math.random() * length);
+    length--;
+    temp = arr[length];
+    arr[length] = arr[index];
     arr[index] = temp;
   }
   return arr;
@@ -293,18 +293,18 @@ function getMapState() {
   return map.classList.contains('map--faded');
 }
 
-function cssPropToNumber(string) {
-  var indexOfPx = string.indexOf('px');
+function cssPropToNumber(property) {
+  var indexOfPx = property.indexOf('px');
 
   if (indexOfPx !== -1) {
-    string = string.slice(0, indexOfPx);
-    string = parseInt(string, 10);
+    property = property.slice(0, indexOfPx);
+    property = parseInt(property, 10);
   } else {
-    string = parseInt(string, 10);
-    string = Math.round(string);
+    property = parseInt(property, 10);
+    property = Math.round(property);
   }
 
-  return string;
+  return property;
 }
 
 function setInitialAddress() {
@@ -345,6 +345,8 @@ function showPopup(id) {
 
   cards.appendChild(generateCard(data));
   map.insertBefore(cards, filters);
+
+  document.addEventListener('keydown', closePopupEsc);
 }
 
 function closePopup(evt) {
@@ -354,6 +356,16 @@ function closePopup(evt) {
 
   source.removeEventListener('click', closePopup);
   map.removeChild(popup);
+}
+
+function closePopupEsc(evt) {
+  evt = evt || window.event;
+
+  if (evt.keyCode === 27) {
+    map.removeChild(map.querySelector('.map__card.popup'));
+  }
+
+  document.removeEventListener('keydown', closePopupEsc);
 }
 
 function findAncestor(el, cls) {
