@@ -151,6 +151,8 @@ function generateCard(data) {
   cardItem.querySelector('.popup__text--time').textContent = 'Заезд после ' + data.offer.checkin + ', выезд до ' + data.offer.checkout;
   cardItem.querySelector('.popup__description').textContent = data.offer.description;
 
+  cardItem.querySelector('.popup__close').addEventListener('click', closePopup);
+
   generateCardFeatures(data.offer.features, cardItem);
   generateCardPhotos(data.offer.photos, cardItem);
 
@@ -179,7 +181,7 @@ function generateCardPhotos(photos, card) {
   }
 }
 
-function generatePin(data , key) {
+function generatePin(data, key) {
   var pinTemplate = document.querySelector('#card_template')
       .content
       .querySelector('.map__pin');
@@ -202,14 +204,13 @@ function setPinOffset(pos, dim) {
   return parseInt(pos, 10) - dim / 2;
 }
 
-function renderElements() {
-  // cards.appendChild(generateCard(dummyData[0]));
-
+function renderPins() {
   for (var key in dummyData) {
     if (Object.prototype.hasOwnProperty.call(dummyData, key)) {
       pins.appendChild(generatePin(dummyData[key], key));
     }
   }
+  pinsBlock.appendChild(pins);
 }
 
 function resetPageState() {
@@ -224,7 +225,7 @@ function resetPageState() {
   }
 
   if (!adFormDisabled) {
-    adForm.classList.add(disabledFromClass);
+    adForm.classList.add(disabledFormClass);
   }
 
   for (var i = 0; i < adFormFieldsets.length; i++) {
@@ -237,7 +238,7 @@ function resetPageState() {
   }
 }
 
-function setActiveState(evt) {
+function setActiveState() {
 
   var fadedClass = 'map--faded';
   var disabledFromClass = 'ad-form--disabled';
@@ -249,21 +250,24 @@ function setActiveState(evt) {
     var fieldset = adFormFieldsets[i];
     fieldset.removeAttribute('disabled');
   }
+
   setAddress();
+  renderPins();
   activatePins();
 }
 
-function getMainPinAddress(type) {
-  if (type)
-  var cssPinX = window.getComputedStyle(pinMain, null).getPropertyValue("left");
-  var cssPinY = window.getComputedStyle(pinMain, null).getPropertyValue("top");
+function getMainPinAddress() {
+
+  var mapIsActive = getMapState();
+
+  var cssPinX = window.getComputedStyle(pinMain, null).getPropertyValue('left');
+  var cssPinY = window.getComputedStyle(pinMain, null).getPropertyValue('top');
 
   var pinX = cssPropToNumber(cssPinX);
   var pinY = cssPropToNumber(cssPinY);
 
   var markWidth = 65;
   var markHeight = 65;
-  var pinWidth = 10;
   var pinHeight = 22;
 
   var offsetX;
@@ -272,7 +276,7 @@ function getMainPinAddress(type) {
   var addressX;
   var addressY;
 
-  if (center) {
+  if (mapIsActive) {
     offsetX = markWidth / 2;
     offsetY = markHeight / 2;
   } else {
@@ -285,14 +289,18 @@ function getMainPinAddress(type) {
   return addressX + ', ' + addressY;
 }
 
+function getMapState() {
+  return map.classList.contains('map--faded');
+}
+
 function cssPropToNumber(string) {
   var indexOfPx = string.indexOf('px');
 
   if (indexOfPx !== -1) {
     string = string.slice(0, indexOfPx);
-    string = parseInt(string);
+    string = parseInt(string, 10);
   } else {
-    string = parseInt(string);
+    string = parseInt(string, 10);
     string = Math.round(string);
   }
 
@@ -300,21 +308,21 @@ function cssPropToNumber(string) {
 }
 
 function setInitialAddress() {
-  var address = getMainPinAddress('center');
+  var address = getMainPinAddress();
 
   adFormAddress.value = address;
 }
 
 function setAddress() {
-  var address = getMainPinAddress('pin');
+  var address = getMainPinAddress();
   adFormAddress.value = address;
 }
 
 function activatePins() {
-  var pins = document.querySelectorAll('.map__pin:not(.map__pin--main)');
+  var userPins = document.querySelectorAll('.map__pin:not(.map__pin--main)');
 
-  pins.forEach(function(pin) {
-    pin.addEventListener('click', pinClick)
+  userPins.forEach(function (pin) {
+    pin.addEventListener('click', pinClick);
   });
 }
 
@@ -322,7 +330,7 @@ function pinClick(evt) {
   var source = evt.currentTarget;
   var id = source.dataset.id;
 
-  showPopup(id)
+  showPopup(id);
 }
 
 function showPopup(id) {
@@ -339,12 +347,24 @@ function showPopup(id) {
   map.insertBefore(cards, filters);
 }
 
+function closePopup(evt) {
+  evt.preventDefault();
+  var source = evt.currentTarget;
+  var popup = findAncestor(source, 'popup');
+
+  source.removeEventListener('click', closePopup);
+  map.removeChild(popup);
+}
+
+function findAncestor(el, cls) {
+  while ((el = el.parentElement) && !el.classList.contains(cls)) {
+    el = el;
+  }
+  return el;
+}
+
 resetPageState();
 setInitialAddress();
 generateDummy();
-renderElements();
-
 
 pinMain.addEventListener('mouseup', setActiveState);
-
-pinsBlock.appendChild(pins);
