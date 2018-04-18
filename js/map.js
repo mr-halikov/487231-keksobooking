@@ -8,7 +8,9 @@ var pins = document.createDocumentFragment();
 var map = document.querySelector('.map');
 var adForm = document.querySelector('.ad-form');
 var adFormFieldsets = adForm.querySelectorAll('fieldset');
+var adFormAddress = adForm.querySelector('#address');
 var pinsBlock = document.querySelector('.map__pins');
+var pinMain = document.querySelector('.map__pin--main');
 var filters = document.querySelector('.map__filters-container');
 
 var offerCollate = {
@@ -177,7 +179,7 @@ function generateCardPhotos(photos, card) {
   }
 }
 
-function generatePin(data) {
+function generatePin(data , key) {
   var pinTemplate = document.querySelector('#card_template')
       .content
       .querySelector('.map__pin');
@@ -189,6 +191,7 @@ function generatePin(data) {
 
   pinItem.style.left = setPinOffset(data.location.x, pinWidth) + 'px';
   pinItem.style.top = setPinOffset(data.location.y, pinHeight) + 'px';
+  pinItem.dataset.id = key;
   pinItemImg.src = data.author.avatar;
   pinItemImg.alt = data.offer.title;
 
@@ -200,21 +203,21 @@ function setPinOffset(pos, dim) {
 }
 
 function renderElements() {
-  cards.appendChild(generateCard(dummyData[0]));
+  // cards.appendChild(generateCard(dummyData[0]));
 
   for (var key in dummyData) {
     if (Object.prototype.hasOwnProperty.call(dummyData, key)) {
-      pins.appendChild(generatePin(dummyData[key]));
+      pins.appendChild(generatePin(dummyData[key], key));
     }
   }
 }
 
 function resetPageState() {
   var fadedClass = 'map--faded';
-  var disabledFromClass = 'ad-form--disabled';
+  var disabledFormClass = 'ad-form--disabled';
 
   var mapFaded = map.classList.contains(fadedClass);
-  var adFormDisabled = adForm.classList.contains(disabledFromClass);
+  var adFormDisabled = adForm.classList.contains(disabledFormClass);
 
   if (!mapFaded) {
     map.classList.add(fadedClass);
@@ -234,9 +237,114 @@ function resetPageState() {
   }
 }
 
+function setActiveState(evt) {
+
+  var fadedClass = 'map--faded';
+  var disabledFromClass = 'ad-form--disabled';
+
+  map.classList.remove(fadedClass);
+  adForm.classList.remove(disabledFromClass);
+
+  for (var i = 0; i < adFormFieldsets.length; i++) {
+    var fieldset = adFormFieldsets[i];
+    fieldset.removeAttribute('disabled');
+  }
+  setAddress();
+  activatePins();
+}
+
+function getMainPinAddress(type) {
+  if (type)
+  var cssPinX = window.getComputedStyle(pinMain, null).getPropertyValue("left");
+  var cssPinY = window.getComputedStyle(pinMain, null).getPropertyValue("top");
+
+  var pinX = cssPropToNumber(cssPinX);
+  var pinY = cssPropToNumber(cssPinY);
+
+  var markWidth = 65;
+  var markHeight = 65;
+  var pinWidth = 10;
+  var pinHeight = 22;
+
+  var offsetX;
+  var offsetY;
+
+  var addressX;
+  var addressY;
+
+  if (center) {
+    offsetX = markWidth / 2;
+    offsetY = markHeight / 2;
+  } else {
+    offsetX = markWidth / 2;
+    offsetY = markHeight + pinHeight;
+  }
+
+  addressX = pinX + offsetX;
+  addressY = pinY + offsetY;
+  return addressX + ', ' + addressY;
+}
+
+function cssPropToNumber(string) {
+  var indexOfPx = string.indexOf('px');
+
+  if (indexOfPx !== -1) {
+    string = string.slice(0, indexOfPx);
+    string = parseInt(string);
+  } else {
+    string = parseInt(string);
+    string = Math.round(string);
+  }
+
+  return string;
+}
+
+function setInitialAddress() {
+  var address = getMainPinAddress('center');
+
+  adFormAddress.value = address;
+}
+
+function setAddress() {
+  var address = getMainPinAddress('pin');
+  adFormAddress.value = address;
+}
+
+function activatePins() {
+  var pins = document.querySelectorAll('.map__pin:not(.map__pin--main)');
+
+  pins.forEach(function(pin) {
+    pin.addEventListener('click', pinClick)
+  });
+}
+
+function pinClick(evt) {
+  var source = evt.currentTarget;
+  var id = source.dataset.id;
+
+  showPopup(id)
+}
+
+function showPopup(id) {
+  var data = dummyData[id];
+  var openCards = map.querySelectorAll('.map__card.popup');
+
+  if (openCards.length !== 0) {
+    for (var i = 0; i < openCards.length; i++) {
+      map.removeChild(openCards[i]);
+    }
+  }
+
+  cards.appendChild(generateCard(data));
+  map.insertBefore(cards, filters);
+}
+
 resetPageState();
+setInitialAddress();
 generateDummy();
 renderElements();
 
-map.insertBefore(cards, filters);
+
+pinMain.addEventListener('mouseup', setActiveState);
+
 pinsBlock.appendChild(pins);
